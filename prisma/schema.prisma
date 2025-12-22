@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum ConsentType {
+  TREATMENT
+  PRIVACY
+  DATA_SHARING
+}
+
+model User {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  name     String
+  password String?
+  isActive Boolean  @default(false)
+  role     UserRole @default(PATIENT)
+
+  patientProfile Patient?
+  doctorProfile  Doctor?
+  auditLogs      AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  phone       String    @unique
+  dateOfBirth DateTime?
+  gender      String?
+  address     String?
+  occupation  String?
+
+  emergency    EmergencyContact?
+  medical      MedicalProfile?
+  identity     IdentityVerification?
+  consents     Consent[]
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+}
+
+model MedicalProfile {
+  id        String  @id @default(uuid())
+  patientId String  @unique
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  allergies            String?
+  currentMedications   String?
+  familyMedicalHistory String?
+  pastMedicalHistory   String?
+}
+
+model EmergencyContact {
+  id        String  @id @default(uuid())
+  patientId String  @unique
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  name  String?
+  phone String?
+}
+
+model IdentityVerification {
+  id        String  @id @default(uuid())
+  patientId String  @unique
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  type        String
+  number      String
+  documentUrl String
+  verifiedAt  DateTime?
+}
+
+model Consent {
+  id        String  @id @default(uuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  type       ConsentType
+  accepted   Boolean
+  acceptedAt DateTime
+}
+
+model Doctor {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  specialty      String
+  licenseNumber  String               @unique
+  availabilities DoctorAvailability[]
+  appointments   Appointment[]
+}
+
+model DoctorAvailability {
+  id       String @id @default(uuid())
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isActive  Boolean @default(true)
+}
+
+model Appointment {
+  id        String  @id @default(uuid())
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+  doctorId  String
+  doctor    Doctor  @relation(fields: [doctorId], references: [id])
+
+  appointmentDate DateTime
+  status          AppointmentStatus @default(PENDING)
+
+  scheduledBy      String?
+  cancelledBy      String?
+  cancellationNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([doctorId, appointmentDate])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String // Contoh: "CANCEL_APPOINTMENT", "VIEW_MEDICAL_RECORD"
+  entityId  String // ID object yang diubah
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
