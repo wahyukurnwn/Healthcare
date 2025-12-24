@@ -1,6 +1,6 @@
-import { GalleryVerticalEnd } from "lucide-react";
-import { FormRegister } from "../_components/form-register";
 import Link from "next/link";
+import { GalleryVerticalEnd } from "lucide-react";
+import { RegisterForm } from "@/components/forms/form-register";
 
 export default function Page() {
   return (
@@ -17,7 +17,7 @@ export default function Page() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <FormRegister />
+            <RegisterForm />
             <div className="text-sm mt-20 flex justify-between">
               <p className="justify-items-end xl:text-left">©healthcare copyright</p>
               <Link href={"#"} className="text-green-500">

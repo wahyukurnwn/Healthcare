@@ -56,6 +56,9 @@ export default async function registerAccountAction(data: z.infer<typeof formSch
       data: newUser,
     };
   } catch (error: any) {
-    console.log(error?.message);
+    return {
+      success: false,
+      message: error?.message || "Internal Server Error",
+    };
   }
 }

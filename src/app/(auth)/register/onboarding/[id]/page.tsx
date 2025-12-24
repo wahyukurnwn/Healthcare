@@ -4,7 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { GalleryVerticalEnd } from "lucide-react";
-import { FormRegisterPatient } from "@/app/(auth)/_components/form-register-patient";
+import { FormRegisterPatient } from "@/components/forms/form-register-patient";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
